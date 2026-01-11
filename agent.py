@@ -42,9 +42,13 @@ if __name__ == "__main__":
     logger.info("=" * 60)
     logger.info("🔧 AGENT WORKER STARTING (Legacy Entry Point)")
     logger.info("=" * 60)
-    logger.info(f"   Agent Name: '{config.livekit.agent_name}'")
+    agent_name = config.livekit.agent_name
+    logger.info(f"   Agent Name: '{agent_name}'")
+    logger.info(f"   🔍 VERIFICATION: Worker will register as agent_name='{agent_name}'")
+    print(f"   🔍 VERIFICATION: Worker will register as agent_name='{agent_name}'")
     logger.info(f"   Status: Registering with LiveKit Cloud...")
     logger.info(f"   Waiting for job dispatch...")
+    logger.info(f"   ⚠️  IMPORTANT: API must send agent_name='{agent_name}' (exact match required)")
     logger.info("=" * 60)
     
     # If no command is provided, default to 'dev' to start the worker

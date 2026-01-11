@@ -383,6 +383,16 @@ async def connection_details(request: ConnectionDetailsRequest):
             room_agent_dispatch = room_config.agents.add()
             room_agent_dispatch.agent_name = agent_name
             print(f"[API] RoomConfiguration created with agent: '{room_agent_dispatch.agent_name}'")
+            
+            # Verify agent name matches what worker expects
+            expected_agent_name = config.livekit.agent_name
+            if agent_name != expected_agent_name:
+                logger.warning(f"[API] ⚠️  Agent name mismatch! Request: '{agent_name}' vs Config: '{expected_agent_name}'")
+                print(f"[API] ⚠️  Agent name mismatch! Request: '{agent_name}' vs Config: '{expected_agent_name}'")
+            else:
+                logger.info(f"[API] ✅ Agent name verified: '{agent_name}' matches config")
+                print(f"[API] ✅ Agent name verified: '{agent_name}' matches config")
+            
             if room_metadata:
                 room_config.metadata = room_metadata
                 logger.info(f"   Room metadata: {room_metadata[:100]}...")
@@ -395,6 +405,23 @@ async def connection_details(request: ConnectionDetailsRequest):
         
         # Generate JWT token
         participant_token = token.to_jwt()
+        
+        # Debug: Verify RoomConfiguration is in token (for deployment debugging)
+        try:
+            import jwt
+            decoded = jwt.decode(participant_token, options={"verify_signature": False})
+            if "room_config" in decoded or "grants" in decoded:
+                logger.info(f"[API] ✅ Token verification: RoomConfiguration encoded in JWT")
+                print(f"[API] ✅ Token verification: RoomConfiguration encoded in JWT")
+                if "room_config" in decoded:
+                    logger.info(f"[API]   room_config in token: {decoded.get('room_config')}")
+                    print(f"[API]   room_config in token: {decoded.get('room_config')}")
+            else:
+                logger.warning(f"[API] ⚠️  Token verification: RoomConfiguration may not be in JWT")
+                print(f"[API] ⚠️  Token verification: RoomConfiguration may not be in JWT")
+                print(f"[API]   Token keys: {list(decoded.keys())}")
+        except Exception as e:
+            logger.warning(f"[API] Could not decode token for verification: {e}")
         
         print(f"[API] ✅ Generated connection details:")
         print(f"[API]   Server URL: {config.livekit.url}")
