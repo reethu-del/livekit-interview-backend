@@ -1,2 +1,2 @@
-web: python start_api.py
+web: python run_server.py
 worker: python agent.py start
