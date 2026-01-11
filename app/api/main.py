@@ -410,12 +410,27 @@ async def connection_details(request: ConnectionDetailsRequest):
         try:
             import jwt
             decoded = jwt.decode(participant_token, options={"verify_signature": False})
-            if "room_config" in decoded or "grants" in decoded:
+            # LiveKit uses 'roomConfig' (camelCase) in JWT, not 'room_config'
+            if "roomConfig" in decoded:
                 logger.info(f"[API] ✅ Token verification: RoomConfiguration encoded in JWT")
                 print(f"[API] ✅ Token verification: RoomConfiguration encoded in JWT")
-                if "room_config" in decoded:
-                    logger.info(f"[API]   room_config in token: {decoded.get('room_config')}")
-                    print(f"[API]   room_config in token: {decoded.get('room_config')}")
+                room_config_data = decoded.get('roomConfig', {})
+                logger.info(f"[API]   roomConfig in token: {room_config_data}")
+                print(f"[API]   roomConfig in token: {room_config_data}")
+                
+                # Verify agent name is in roomConfig
+                if isinstance(room_config_data, dict):
+                    agents = room_config_data.get('agents', [])
+                    if agents and len(agents) > 0:
+                        agent_name_in_token = agents[0].get('agentName', '')
+                        logger.info(f"[API]   ✅ Agent name in token: '{agent_name_in_token}'")
+                        print(f"[API]   ✅ Agent name in token: '{agent_name_in_token}'")
+                        if agent_name_in_token != agent_name:
+                            logger.warning(f"[API]   ⚠️  Agent name mismatch in token! Expected: '{agent_name}', Got: '{agent_name_in_token}'")
+                            print(f"[API]   ⚠️  Agent name mismatch in token! Expected: '{agent_name}', Got: '{agent_name_in_token}'")
+            elif "grants" in decoded:
+                logger.info(f"[API] ✅ Token has grants (RoomConfiguration may be in grants)")
+                print(f"[API] ✅ Token has grants (RoomConfiguration may be in grants)")
             else:
                 logger.warning(f"[API] ⚠️  Token verification: RoomConfiguration may not be in JWT")
                 print(f"[API] ⚠️  Token verification: RoomConfiguration may not be in JWT")
