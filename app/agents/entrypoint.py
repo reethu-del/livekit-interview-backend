@@ -53,11 +53,13 @@ async def entrypoint(ctx: JobContext) -> None:
         
         logger.info("=" * 60)
         logger.info("🚀 AGENT JOB DISPATCHED")
+        print("🚀 AGENT JOB DISPATCHED")  # Ensure visible in Railway logs
         logger.info("=" * 60)
         logger.info(f"📋 JOB DETAILS:")
         logger.info(f"   Job ID: {ctx.job.id}")
         logger.info(f"   Room Name: {ctx.room.name}")
         logger.info(f"   Agent Name: {config.livekit.agent_name}")
+        print(f"📋 JOB DETAILS: Job ID: {ctx.job.id}, Room: {ctx.room.name}, Agent: {config.livekit.agent_name}")
         logger.info("=" * 60)
         
         # Step 1: Connect to room
