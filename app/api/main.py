@@ -311,6 +311,9 @@ async def connection_details(request: ConnectionDetailsRequest):
             )
         
         # Extract agent name from request
+        print(f"[API] 📥 Received connection-details request:")
+        print(f"[API]   room_config: {request.room_config}")
+        print(f"[API]   token: {request.token if request.token else 'None'}")
         logger.info(f"[API] 📥 Received connection-details request:")
         logger.info(f"   room_config: {request.room_config}")
         logger.info(f"   token: {request.token if request.token else 'None'}")
@@ -372,22 +375,33 @@ async def connection_details(request: ConnectionDetailsRequest):
         
         # Set room configuration with agent
         if agent_name:
+            print(f"[API] 🔧 Creating RoomConfiguration with agent dispatch:")
+            print(f"[API] Agent Name: '{agent_name}'")
             logger.info(f"[API] 🔧 Creating RoomConfiguration with agent dispatch:")
             logger.info(f"   Agent Name: '{agent_name}'")
             room_config = livekit_api.RoomConfiguration()
             room_agent_dispatch = room_config.agents.add()
             room_agent_dispatch.agent_name = agent_name
+            print(f"[API] RoomConfiguration created with agent: '{room_agent_dispatch.agent_name}'")
             if room_metadata:
                 room_config.metadata = room_metadata
                 logger.info(f"   Room metadata: {room_metadata[:100]}...")
             token.with_room_config(room_config)
+            print(f"[API] ✅ RoomConfiguration attached to token")
             logger.info(f"[API] ✅ RoomConfiguration set with agent dispatch")
         else:
+            print(f"[API] ⚠️  No agent_name provided - agent will NOT be dispatched!")
             logger.warning(f"[API] ⚠️  No agent_name provided - agent will NOT be dispatched!")
         
         # Generate JWT token
         participant_token = token.to_jwt()
         
+        print(f"[API] ✅ Generated connection details:")
+        print(f"[API]   Server URL: {config.livekit.url}")
+        print(f"[API]   Room Name: {room_name}")
+        print(f"[API]   Participant Name: {participant_name}")
+        print(f"[API]   Agent Name: {agent_name}")
+        print(f"[API]   Token Length: {len(participant_token)} chars")
         logger.info(f"[API] ✅ Generated connection details:")
         logger.info(f"   Server URL: {config.livekit.url}")
         logger.info(f"   Room Name: {room_name}")
